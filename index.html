@@ -4,25 +4,71 @@
 <head>
     <title>hello world</title>
     <script src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.min.js"></script>
+    <script src="https://cdn.bootcss.com/vue/2.5.21/vue.min.js"></script>
 </head>
 
 <body>
-    <h1>hello world</h1>
+    <div id="app">
+        <form accept-charset="utf-8">
+            <input type='text' v-model='username' type="button">
+            <input type='text' v-model='password' type="button">
+            <button @click.prevent='login'>login</button>
+        </form>
+        <button @click='getPublicResource'>public</button>
+        <button @click='getSecretResource'>secret</button>
+        <h2>resource:</h2>
+        <p>{{resource}}</p>
+        <h2>res:</h2>
+        <p>{{rep}}</p>
+    </div>
     <script>
-    axios.post('/login', {
-            username: 'admin',
-            password: 'admin'
-        })
-        .then(({ data: { token } }) => {
-            console.log(token);
-            axios({
-                method:'get',
-                url: '/resource/secret',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
-            }).then(console.log);
-        })
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                username: '',
+                password: '',
+                token: '',
+                resource: 'this is the resource',
+                rep: ''
+            }
+        },
+        methods: {
+            login() {
+                axios({
+                    url: '/login',
+                    method: 'post',
+                    data: {
+                        username: this.username,
+                        password: this.password
+                    },
+                }).then(({ data }) => {
+                    this.rep = data;
+                    this.token = data.token
+                })
+            },
+            getPublicResource() {
+                axios({
+                    url: '/resource',
+                    method: 'get',
+                }).then(({ data }) => {
+                    this.resource = data
+                })
+            },
+            getSecretResource() {
+                axios({
+                    url: '/resource/secret',
+                    method: 'get',
+                    headers:{
+                        'Authorization':`Bearer ${this.token}`
+                    }
+                }).then(({ data }) => {
+                    this.resource = data
+                })
+            }
+        }
+
+    })
     </script>
 </body>
 
